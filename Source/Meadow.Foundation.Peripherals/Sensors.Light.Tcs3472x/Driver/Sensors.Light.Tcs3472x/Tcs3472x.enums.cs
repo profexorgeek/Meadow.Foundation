@@ -1,4 +1,6 @@
-﻿namespace Meadow.Foundation.Sensors.Light
+﻿using System;
+
+namespace Meadow.Foundation.Sensors.Light
 {
     public partial class Tcs3472x
     {
@@ -24,9 +26,9 @@
             Gain60X = 0x03,
         }
 
-        protected enum Registers
+        [Flags]
+        private enum EnableBit : byte
         {
-            ENABLE = 0x00,
             // RGBC interrupt enable.  When asserted, permits RGBC interrupts to be generated.
             ENABLE_AIEN = 0x10,
             // Wait enable.  This bit activates the wait feature.  Writing a 1 activates the wait timer.  Writing a 0 disables the wait timer.
@@ -35,6 +37,20 @@
             ENABLE_AEN = 0x02,
             // Power ON.  This bit activates the internal oscillator to permit the timers and ADC channels to operate. Writing a 1 activates the oscillator.  Writing a 0 disables the oscillator.
             ENABLE_PON = 0x01,
+        }
+
+        [Flags]
+        private enum StatusBit : byte
+        {
+            // RGBC clear channel Interrupt.
+            STATUS_AINT = 0x10,
+            // RGBC Valid. Indicates that the RGBC channels have completed an integration cycle.
+            STATUS_AVALID = 0x01,
+        }
+
+        private enum Register : byte
+        {
+            ENABLE = 0x00,
             // The RGBC timing register controls the internal integration time of the RGBC clear and IR channel ADCs in 2.4-ms increments. Max RGBC Count = (256 − ATIME) × 1024 up to a maximum of 65535.
             // Integration time
             ATIME = 0x01,
@@ -60,10 +76,6 @@
             ID = 0x12,
             // The Status Register provides the internal status of the device.
             STATUS = 0x13,
-            // RGBC clear channel Interrupt.
-            STATUS_AINT = 0x10,
-            // RGBC Valid. Indicates that the RGBC channels have completed an integration cycle.
-            STATUS_AVALID = 0x01,
             // Clear data
             CDATAL = 0x14,
             CDATAH = 0x15,

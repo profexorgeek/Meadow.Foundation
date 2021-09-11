@@ -58,7 +58,7 @@ namespace Meadow.Foundation.Sensors.Light
             set
             {
                 gain = value;
-                Peripheral.WriteRegister((byte)Registers.CONTROL, (byte)gain);
+                WriteRegister(Register.CONTROL, (byte)gain);
             }
         }
 
@@ -75,8 +75,8 @@ namespace Meadow.Foundation.Sensors.Light
         {
             get
             {
-                var status = Peripheral.ReadRegister((byte)(Registers.COMMAND_BIT | Registers.STATUS));
-                return ((Registers)(status & (byte)Registers.STATUS_AINT) == Registers.STATUS_AINT);
+                var status = ReadRegister8(Register.STATUS);
+                return ((StatusBit)(status & (byte)StatusBit.STATUS_AINT) == StatusBit.STATUS_AINT);
             }
         }
 
@@ -96,8 +96,15 @@ namespace Meadow.Foundation.Sensors.Light
             double integrationTime = 0.700, GainType gain = GainType.Gain60X)
                 : base(i2cBus, address)
         {
+            Initialize();
+        }
+
+        private void Initialize()
+        {
+            Console.WriteLine($"Reading ID");
+
             //detect device type
-            Device = (DeviceType)Peripheral.ReadRegister((byte)(Registers.COMMAND_BIT | Registers.ID));
+            Device = (DeviceType)ReadRegister8(Register.ID);
 
             Console.WriteLine($"Device: {Device}");
 
@@ -132,14 +139,20 @@ namespace Meadow.Foundation.Sensors.Light
                     divide *= 12.0;
                 }
 
-                Console.WriteLine($"Red: {I2cRead16(Registers.RDATAL)}");
-                Console.WriteLine($"Green: {I2cRead16(Registers.GDATAL)}");
-                Console.WriteLine($"Blue: {I2cRead16(Registers.BDATAL)}");
+                var rd = ReadRegister(Register.RDATAL);
+                var gd = ReadRegister(Register.GDATAL);
+                var bd = ReadRegister(Register.BDATAL);
+                var cd = ReadRegister(Register.CDATAL);
 
-                double r = (I2cRead16(Registers.RDATAL) / divide);
-                double g = (I2cRead16(Registers.GDATAL) / divide);
-                double b = (I2cRead16(Registers.BDATAL) / divide);
-                double a = (I2cRead16(Registers.CDATAL) / divide);
+                Console.WriteLine($"Red: 0x{rd:x4}");
+                Console.WriteLine($"Green: 0x{gd:x4}");
+                Console.WriteLine($"Blue: 0x{bd:x4}");
+                Console.WriteLine($"Clear: 0x{cd:x4}");
+
+                double r = rd / divide;
+                double g = gd / divide;
+                double b = bd / divide;
+                double a = cd / divide;
 
                 conditions.Color = Color.FromRgba(r, g, b, a);
 
@@ -177,7 +190,7 @@ namespace Meadow.Foundation.Sensors.Light
 
                 isLongTime = false;
                 var timeByte = Math.Clamp((int)(0x100 - (timeSeconds / 0.0024)), 0, 255);
-                Peripheral.WriteRegister((byte)Registers.ATIME, (byte)timeByte);
+                WriteRegister(Register.ATIME, (byte)timeByte);
                 integrationTimeByte = (byte)timeByte;
             }
             else
@@ -190,28 +203,28 @@ namespace Meadow.Foundation.Sensors.Light
                 isLongTime = true;
                 var timeByte = (int)(0x100 - (timeSeconds / 0.029));
                 timeByte = Math.Clamp(timeByte, 0, 255);
-                Peripheral.WriteRegister((byte)Registers.WTIME, (byte)timeByte);
+                WriteRegister(Register.WTIME, (byte)timeByte);
                 integrationTimeByte = (byte)timeByte;
             }
         }
 
         private void SetConfigLongTime(bool setLong)
         {
-            Peripheral.WriteRegister((byte)Registers.CONFIG, setLong ? (byte)(Registers.CONFIG_WLONG) : (byte)0x00);
+            Peripheral.WriteRegister((byte)Register.CONFIG, setLong ? (byte)(Register.CONFIG_WLONG) : (byte)0x00);
         }
 
         private void PowerOn()
         {
-            Peripheral.WriteRegister((byte)Registers.ENABLE, (byte)Registers.ENABLE_PON);
+            WriteRegister(Register.ENABLE, (byte)EnableBit.ENABLE_PON);
             Thread.Sleep(3);
-            Peripheral.WriteRegister((byte)Registers.ENABLE, (byte)(Registers.ENABLE_PON | Registers.ENABLE_AEN));
+            WriteRegister(Register.ENABLE, (byte)(EnableBit.ENABLE_PON | EnableBit.ENABLE_AEN));
         }
 
         private void PowerOff()
         {
-            var powerState = Peripheral.ReadRegister((byte)Registers.ENABLE);
-            powerState = (byte)(powerState & ~(byte)(Registers.ENABLE_PON | Registers.ENABLE_AEN));
-            Peripheral.WriteRegister((byte)Registers.ENABLE, powerState);
+            byte powerState = ReadRegister8((byte)Register.ENABLE);
+            powerState = (byte)(powerState & ~(byte)(EnableBit.ENABLE_PON | EnableBit.ENABLE_AEN));
+            WriteRegister(Register.ENABLE, powerState);
         }
 
         /// <summary>
@@ -228,17 +241,17 @@ namespace Meadow.Foundation.Sensors.Light
         /// This is used to have more than 1 cycle before generating an
         /// interruption.
         /// </summary>
-        /// <param name="interupt">The percistence cycles</param>
+        /// <param name="interupt">The persistence cycles</param>
         /// <param name="state">True to set the interrupt, false to clear</param>
         public void SetInterrupt(InterruptState interupt, bool state)
         {
-            Peripheral.WriteRegister((byte)Registers.PERS, (byte)interupt);
-            var enable = Peripheral.ReadRegister((byte)Registers.ENABLE);
+            WriteRegister(Register.PERS, (byte)interupt);
+            byte enable = ReadRegister8(Register.ENABLE);
 
             enable = state
-                ? enable |= (byte)Registers.ENABLE_AIEN
-                : enable = (byte)(enable & ~(byte)Registers.ENABLE_AIEN);
-            Peripheral.WriteRegister((byte)Registers.ENABLE, enable);
+                ? enable |= (byte)EnableBit.ENABLE_AIEN
+                : enable = (byte)(enable & ~(byte)EnableBit.ENABLE_AIEN);
+            WriteRegister((byte)Register.ENABLE, enable);
         }
 
         /// <summary>
@@ -246,14 +259,28 @@ namespace Meadow.Foundation.Sensors.Light
         /// </summary>
         protected bool IsValidData()
         {
-            var status = Peripheral.ReadRegister((byte)(Registers.COMMAND_BIT | Registers.STATUS));
-            return ((Registers)(status & (byte)Registers.STATUS_AVALID) == Registers.STATUS_AVALID);
+            var status = ReadRegister8(Register.STATUS);
+            return ((StatusBit)(status & (byte)StatusBit.STATUS_AVALID) == StatusBit.STATUS_AVALID);
         }
 
-
-        protected ushort I2cRead16(Registers reg)
+        private void WriteRegister(Register register, byte value)
         {
-            return Peripheral.ReadRegisterAsUShort((byte)(Registers.COMMAND_BIT | reg), ByteOrder.BigEndian);
+            Console.WriteLine($"WRITE {register}: 0x{value:x2}");
+            Peripheral.WriteRegister((byte)register, value);
+        }
+
+        private byte ReadRegister8(Register register)
+        {
+            var data = Peripheral.ReadRegister((byte)(Register.COMMAND_BIT | register));
+            Console.WriteLine($"READ {register}: 0x{data:x2}");
+            return data;
+        }
+
+        private ushort ReadRegister(Register register)
+        {
+            var data = Peripheral.ReadRegisterAsUShort((byte)(Register.COMMAND_BIT | register), ByteOrder.BigEndian);
+            Console.WriteLine($"READ {register}: 0x{data:x4}");
+            return data;
         }
     }
 }
