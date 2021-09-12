@@ -68,8 +68,6 @@ namespace Meadow.Foundation.Sensors.Light
             PERS = 0x0C,
             // The configuration register sets the wait long time.
             CONFIG = 0x0D,
-            // Wait Long. When asserted, the wait cycles are increased by a factor 12× from that programmed in the WTIME register.
-            CONFIG_WLONG = 0x02,
             // The Control register provides eight bits of miscellaneous control to the analog block. These bits typically control functions such as gain settings and/or diode selection.
             CONTROL = 0x0F,
             // 0x44 = TCS34721/TCS34725, 0x4D = TCS34723/TCS34727
@@ -88,8 +86,12 @@ namespace Meadow.Foundation.Sensors.Light
             // Blue data
             BDATAL = 0x1A,
             BDATAH = 0x1B,
-            COMMAND_BIT = 0x80,
+            
         }
+
+        // Wait Long. When asserted, the wait cycles are increased by a factor 12× from that programmed in the WTIME register.
+        private const byte CONFIG_WLONG = 0x02;
+        private const byte COMMAND_BIT = 0x80;
 
         /// <summary>
         /// This enum allows to select how many cycles cill be done measuring before

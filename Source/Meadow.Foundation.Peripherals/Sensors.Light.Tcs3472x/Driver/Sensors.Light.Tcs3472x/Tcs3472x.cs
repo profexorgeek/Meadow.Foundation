@@ -139,7 +139,7 @@ namespace Meadow.Foundation.Sensors.Light
                     divide *= 12.0;
                 }
 
-                var rd = ReadRegister(Register.RDATAL);
+                var rd = ReadRegister8(Register.RDATAL);
                 var gd = ReadRegister(Register.GDATAL);
                 var bd = ReadRegister(Register.BDATAL);
                 var cd = ReadRegister(Register.CDATAL);
@@ -210,7 +210,7 @@ namespace Meadow.Foundation.Sensors.Light
 
         private void SetConfigLongTime(bool setLong)
         {
-            Peripheral.WriteRegister((byte)Register.CONFIG, setLong ? (byte)(Register.CONFIG_WLONG) : (byte)0x00);
+            Peripheral.WriteRegister((byte)Register.CONFIG, setLong ? CONFIG_WLONG : (byte)0x00);
         }
 
         private void PowerOn()
@@ -248,15 +248,26 @@ namespace Meadow.Foundation.Sensors.Light
             WriteRegister(Register.PERS, (byte)interupt);
             byte enable = ReadRegister8(Register.ENABLE);
 
-            enable = state
-                ? enable |= (byte)EnableBit.ENABLE_AIEN
-                : enable = (byte)(enable & ~(byte)EnableBit.ENABLE_AIEN);
+            if(state)
+            {
+                enable |= (byte)EnableBit.ENABLE_AIEN;
+            }
+            else
+            {
+                enable &= unchecked((byte)~EnableBit.ENABLE_AIEN);
+            }
+
             WriteRegister((byte)Register.ENABLE, enable);
         }
 
-        /// <summary>
-        /// Get true is there are valid data
-        /// </summary>
+        private void ShowAllRegisters()
+        {
+            foreach(Register r in Enum.GetValues(typeof(Register)))
+            {
+                Console.WriteLine($"{r} = 0x{ReadRegister8(r):x2}");
+            }
+        }
+
         protected bool IsValidData()
         {
             var status = ReadRegister8(Register.STATUS);
@@ -271,14 +282,14 @@ namespace Meadow.Foundation.Sensors.Light
 
         private byte ReadRegister8(Register register)
         {
-            var data = Peripheral.ReadRegister((byte)(Register.COMMAND_BIT | register));
+            var data = Peripheral.ReadRegister((byte)(COMMAND_BIT | (byte)register));
             Console.WriteLine($"READ {register}: 0x{data:x2}");
             return data;
         }
 
         private ushort ReadRegister(Register register)
         {
-            var data = Peripheral.ReadRegisterAsUShort((byte)(Register.COMMAND_BIT | register), ByteOrder.BigEndian);
+            var data = Peripheral.ReadRegisterAsUShort((byte)(COMMAND_BIT | (byte)register), ByteOrder.BigEndian);
             Console.WriteLine($"READ {register}: 0x{data:x4}");
             return data;
         }
