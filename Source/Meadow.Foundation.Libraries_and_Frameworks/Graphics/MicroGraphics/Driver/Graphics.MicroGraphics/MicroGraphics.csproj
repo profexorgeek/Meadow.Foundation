@@ -1,4 +1,4 @@
-<Project Sdk="Meadow.Sdk/1.1.0">
+﻿<Project Sdk="Meadow.Sdk/1.1.0">
   <PropertyGroup>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <Authors>Wilderness Labs, Inc</Authors>
@@ -19,7 +19,6 @@
   <Choose>
     <When Condition="'$(Configuration)' == 'ProjectRefs'">
       <ItemGroup>
-        <PackageReference Include="Meadow.Contracts" Version="0.*" />
         <ProjectReference Include="..\..\..\..\..\Meadow.Foundation.Core\Meadow.Foundation.Core.csproj" />
       </ItemGroup>
     </When>
