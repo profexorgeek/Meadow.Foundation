@@ -3,7 +3,7 @@ name: Build MicroGraphics Latest Binaries
 on:
   workflow_dispatch:
   push:
-    branches: [ modbus ]
+    branches: [ micrographics ]
     
 jobs:
   build:
