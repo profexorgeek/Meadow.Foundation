@@ -17,11 +17,11 @@ jobs:
       with:
         dotnet-version: 6.0.x
     - name: Build for F7
-      run: dotnet publish Source/Meadow.Foundation.Libraries_and_Frameworks/Modbus/Meadow.Modbus/Meadow.Modbus.csproj --framework netstandard2.1
+      run: dotnet publish Source/Meadow.Foundation.Libraries_and_Frameworks/Modbus/Meadow.Modbus/Meadow.Modbus.csproj --framework netstandard2.1 -o ./output
     - name: Build ZIP
       uses: vimtor/action-zip@v1
       with:
-          files: ./Meadow.Modbus.dll
+          files: ./output/Meadow.Modbus.dll
           dest: modbus.zip
           
     - name: Create assets
