@@ -1,4 +1,4 @@
-name: Build mODBUS Latest Binaries
+name: Build Modbus Latest Binaries
 
 on:
   workflow_dispatch:
