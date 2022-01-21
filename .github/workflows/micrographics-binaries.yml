@@ -17,7 +17,7 @@ jobs:
       with:
         dotnet-version: 6.0.x
     - name: Build for F7
-      run: dotnet publish Source/Meadow.Foundation.Libraries_and_Frameworks/Graphics/MicroGraphics/Driver/Graphics.MicroGraphics/Graphics.MicroGraphics.csproj --framework netstandard2.1 -o ./output
+      run: dotnet publish Source/Meadow.Foundation.Libraries_and_Frameworks/Graphics/MicroGraphics/Driver/Graphics.MicroGraphics/MicroGraphics.csproj --framework netstandard2.1 -o ./output
     - name: Build ZIP
       uses: vimtor/action-zip@v1
       with:
