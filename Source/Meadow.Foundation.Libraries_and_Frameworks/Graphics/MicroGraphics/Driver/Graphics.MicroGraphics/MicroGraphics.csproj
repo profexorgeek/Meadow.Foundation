@@ -19,7 +19,8 @@
   <Choose>
     <When Condition="'$(Configuration)' == 'ProjectRefs'">
       <ItemGroup>
-    <ProjectReference Include="..\..\..\..\..\Meadow.Foundation.Core\Meadow.Foundation.Core.csproj" />
+        <PackageReference Include="Meadow.Contracts" Version="0.*" />
+        <ProjectReference Include="..\..\..\..\..\Meadow.Foundation.Core\Meadow.Foundation.Core.csproj" />
       </ItemGroup>
     </When>
     <Otherwise>
