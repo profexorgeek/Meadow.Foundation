@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Meadow.Modbus
@@ -11,7 +12,8 @@ namespace Meadow.Modbus
         public event EventHandler Disconnected = delegate { };
         public event EventHandler Connected = delegate { };
 
-        private bool m_connected;
+        private bool _connected;
+        private SemaphoreSlim _syncRoot = new SemaphoreSlim(1, 1);
 
         protected abstract byte[] GenerateWriteMessage(byte modbusAddress, ModbusFunction function, ushort register, byte[] data);
         protected abstract byte[] GenerateReadMessage(byte modbusAddress, ModbusFunction function, ushort startRegister, int registerCount);
@@ -24,12 +26,12 @@ namespace Meadow.Modbus
 
         public bool IsConnected
         {
-            get => m_connected;
+            get => _connected;
             protected set
             {
-                m_connected = value;
+                _connected = value;
 
-                if (m_connected)
+                if (_connected)
                 {
                     Connected?.Invoke(this, EventArgs.Empty);
                 }
@@ -42,61 +44,93 @@ namespace Meadow.Modbus
 
         public async Task WriteHoldingRegister(byte modbusAddress, ushort register, ushort value)
         {
-            // swap endianness, because Modbus
-            var data = BitConverter.GetBytes(IPAddress.HostToNetworkOrder((short)value));
-            var message = GenerateWriteMessage(modbusAddress, ModbusFunction.WriteRegister, register, data);
-            await DeliverMessage(message);
-            await ReadResult(ModbusFunction.WriteRegister);
+            await _syncRoot.WaitAsync();
+            try
+            {
+                // swap endianness, because Modbus
+                var data = BitConverter.GetBytes(IPAddress.HostToNetworkOrder((short)value));
+                var message = GenerateWriteMessage(modbusAddress, ModbusFunction.WriteRegister, register, data);
+                await DeliverMessage(message);
+                await ReadResult(ModbusFunction.WriteRegister);
+            }
+            finally
+            {
+                _syncRoot.Release();
+            }
         }
 
         public async Task<ushort[]> ReadHoldingRegisters(byte modbusAddress, ushort startRegister, int registerCount)
         {
-            if (registerCount > MaxRegisterReadCount) throw new ArgumentException($"A maximum of {MaxRegisterReadCount} registers can be retrieved at one time");
-
-            var message = GenerateReadMessage(modbusAddress, ModbusFunction.ReadHoldingRegister, startRegister, registerCount);
-            await DeliverMessage(message);
-            var result = await ReadResult(ModbusFunction.ReadHoldingRegister);
-
-            var registers = new ushort[registerCount];
-            for (var i = 0; i < registerCount; i++)
+            await _syncRoot.WaitAsync();
+            try
             {
-                registers[i] = (ushort)((result[i * 2] << 8) | (result[i * 2 + 1]));
+                if (registerCount > MaxRegisterReadCount) throw new ArgumentException($"A maximum of {MaxRegisterReadCount} registers can be retrieved at one time");
+
+                var message = GenerateReadMessage(modbusAddress, ModbusFunction.ReadHoldingRegister, startRegister, registerCount);
+                await DeliverMessage(message);
+                var result = await ReadResult(ModbusFunction.ReadHoldingRegister);
+
+                var registers = new ushort[registerCount];
+                for (var i = 0; i < registerCount; i++)
+                {
+                    registers[i] = (ushort)((result[i * 2] << 8) | (result[i * 2 + 1]));
+                }
+                return registers;
             }
-            return registers;
+            finally
+            {
+                _syncRoot.Release();
+            }
         }
 
         public async Task WriteCoil(byte modbusAddress, ushort register, bool value)
         {
-            var data = value ? new byte[] { 0xff, 0xff } : new byte[] { 0x00, 0x00 };
+            await _syncRoot.WaitAsync();
+            try
+            {
+                var data = value ? new byte[] { 0xff, 0xff } : new byte[] { 0x00, 0x00 };
 
-            var message = GenerateWriteMessage(modbusAddress, ModbusFunction.WriteCoil, register, data);
-            await DeliverMessage(message);
-            await ReadResult(ModbusFunction.WriteCoil);
+                var message = GenerateWriteMessage(modbusAddress, ModbusFunction.WriteCoil, register, data);
+                await DeliverMessage(message);
+                await ReadResult(ModbusFunction.WriteCoil);
+            }
+            finally
+            {
+                _syncRoot.Release();
+            }
         }
 
         public async Task<bool[]> ReadCoils(byte modbusAddress, ushort startCoil, int coilCount)
         {
-            if (coilCount > MaxRegisterReadCount) throw new ArgumentException($"A maximum of {MaxRegisterReadCount} coils can be retrieved at one time");
-
-            var message = GenerateReadMessage(modbusAddress, ModbusFunction.ReadCoil, startCoil, coilCount);
-            await DeliverMessage(message);
-            var result = await ReadResult(ModbusFunction.ReadHoldingRegister);
-
-            int currentValue = 0;
-            int currentBit;
-            var values = new bool[coilCount];
-
-            for (var i = 0; i < result.Length; i++)
+            await _syncRoot.WaitAsync();
+            try
             {
-                currentBit = 0;
-                while (currentValue < coilCount && currentBit < 8)
-                {
-                    var r = result[i] & (1 << currentBit++);
-                    values[currentValue++] = r != 0;
-                }
-            }
+                if (coilCount > MaxRegisterReadCount) throw new ArgumentException($"A maximum of {MaxRegisterReadCount} coils can be retrieved at one time");
 
-            return values;
+                var message = GenerateReadMessage(modbusAddress, ModbusFunction.ReadCoil, startCoil, coilCount);
+                await DeliverMessage(message);
+                var result = await ReadResult(ModbusFunction.ReadHoldingRegister);
+
+                int currentValue = 0;
+                int currentBit;
+                var values = new bool[coilCount];
+
+                for (var i = 0; i < result.Length; i++)
+                {
+                    currentBit = 0;
+                    while (currentValue < coilCount && currentBit < 8)
+                    {
+                        var r = result[i] & (1 << currentBit++);
+                        values[currentValue++] = r != 0;
+                    }
+                }
+
+                return values;
+            }
+            finally
+            {
+                _syncRoot.Release();
+            }
         }
     }
 }

@@ -21,7 +21,6 @@ namespace Meadow.Modbus
         {
             if (_enable != null)
             {
-                Console.WriteLine($"{(state ? "ON" : "OFF")}");
                 _enable.State = state;
             }
         }
@@ -52,11 +51,17 @@ namespace Meadow.Modbus
             {
                 await Task.Delay(10);
                 t += 10;
-                if (t > _port.ReadTimeout) throw new TimeoutException();
+                if (t > _port.ReadTimeout.TotalMilliseconds) throw new TimeoutException();
             }
 
             var buffer = new byte[_port.BytesToRead];
-            _port.Read(buffer, 0, buffer.Length);
+
+            var read = 0;
+
+            while (read < buffer.Length)
+            {
+                read += _port.Read(buffer, read, buffer.Length - read);
+            }
 
             // do a CRC on all but the last 2 bytes, then see if that matches the last 2
             var expectedCrc = Crc(buffer, 0, buffer.Length - 2);
@@ -79,14 +84,12 @@ namespace Meadow.Modbus
             return await Task.FromResult(result);
         }
 
-        protected override Task DeliverMessage(byte[] message)
+        protected override async Task DeliverMessage(byte[] message)
         {
-            return Task.Run(() =>
-            {
-                SetEnable(true);
-                _port.Write(message);
-                SetEnable(false);
-            });
+            SetEnable(true);
+            _port.Write(message);
+            await Task.Delay(1); // without this delay, the CRC is unreliable. I suspect we're disabling before the destination has fully processed.  I'd love a < 1ms delay, but this is what we have
+            SetEnable(false);
         }
 
         protected override byte[] GenerateReadMessage(byte modbusAddress, ModbusFunction function, ushort startRegister, int registerCount)
