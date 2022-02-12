@@ -18,20 +18,32 @@ namespace Meadow.Foundation.Sensors.Hid
         //==== events
 
         //==== internals
+        /// <summary>
+        /// Number of samples used to calculate position
+        /// </summary>
         protected int sampleCount;
+        /// <summary>
+        /// Interval between samples 
+        /// </summary>
         protected int sampleIntervalMs;
 
         //==== properties
+        /// <summary>
+        /// Analog port connected to horizonal joystick pin
+        /// </summary>
         protected IAnalogInputPort HorizontalInputPort { get; set; }
+        /// <summary>
+        /// Analog port connected to vertical joystick pin
+        /// </summary>
         protected IAnalogInputPort VerticalInputPort { get; set; }
 
         /// <summary>
-        /// 
+        /// Is the joystick inverted 
         /// </summary>
         public bool IsInverted { get; protected set; }
 
         /// <summary>
-        /// 
+        /// Current position of
         /// </summary>
         public JoystickPosition? Position { get; protected set; }
 
@@ -45,36 +57,54 @@ namespace Meadow.Foundation.Sensors.Hid
         }
 
         /// <summary>
-        /// 
+        /// Callibration for 2-axis analog joystick
         /// </summary>
         public JoystickCalibration Calibration { get; protected set; }
 
         /// <summary>
-        /// 
+        /// Creates a 2-axis analog joystick
         /// </summary>
         /// <param name="device">The `IAnalogInputController` to create the port on.</param>
         /// <param name="horizontalPin"></param>
         /// <param name="verticalPin"></param>
         /// <param name="calibration">Calibration for the joystick.</param>
         /// <param name="isInverted">Whether or not the vertical component is inverted.</param>
-        /// <param name="updateIntervalMs">The time, in milliseconds, to wait
-        /// between sets of sample readings. This value determines how often
-        /// `Changed` events are raised and `IObservable` consumers are notified.</param>
+        public AnalogJoystick(
+            IAnalogInputController device, IPin horizontalPin, IPin verticalPin,
+            JoystickCalibration? calibration = null, bool isInverted = false)
+                : this(device, horizontalPin, verticalPin, calibration, isInverted, 5, TimeSpan.FromMilliseconds(40))
+        { }
+
+        /// <summary>
+        /// Creates a 2-axis analog joystick
+        /// </summary>
+        /// <param name="device">The `IAnalogInputController` to create the port on.</param>
+        /// <param name="horizontalPin"></param>
+        /// <param name="verticalPin"></param>
+        /// <param name="calibration">Calibration for the joystick.</param>
+        /// <param name="isInverted">Whether or not the vertical component is inverted.</param>
         /// <param name="sampleCount">How many samples to take during a given
         /// reading. These are automatically averaged to reduce noise.</param>
-        /// <param name="sampleIntervalMs">The time, in milliseconds,
+        /// <param name="sampleInterval">The time, in milliseconds,
         /// to wait in between samples during a reading.</param>
         public AnalogJoystick(
             IAnalogInputController device, IPin horizontalPin, IPin verticalPin,
-            JoystickCalibration? calibration = null, bool isInverted = false,
-            int updateIntervalMs = 1000,
-            int sampleCount = 5, int sampleIntervalMs = 40)
+            JoystickCalibration? calibration, bool isInverted,
+            int sampleCount, 
+            TimeSpan sampleInterval)
                 : this(
-                      device.CreateAnalogInputPort(horizontalPin, updateIntervalMs, sampleCount, sampleIntervalMs),
-                      device.CreateAnalogInputPort(verticalPin, updateIntervalMs, sampleCount, sampleIntervalMs),
+                      device.CreateAnalogInputPort(horizontalPin, sampleCount, sampleInterval, new Voltage(3.3, VU.Volts)),
+                      device.CreateAnalogInputPort(verticalPin, sampleCount, sampleInterval, new Voltage(3.3, VU.Volts)),
                       calibration, isInverted)
         { }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="horizontalInputPort"></param>
+        /// <param name="verticalInputPort"></param>
+        /// <param name="calibration"></param>
+        /// <param name="isInverted"></param>
         public AnalogJoystick(
             IAnalogInputPort horizontalInputPort, IAnalogInputPort verticalInputPort,
             JoystickCalibration? calibration = null, bool isInverted = false)
@@ -238,11 +268,6 @@ namespace Meadow.Foundation.Sensors.Hid
         /// Convenience method to get the current temperature. For frequent reads, use
         /// StartSampling() and StopSampling() in conjunction with the SampleBuffer.
         /// </summary>
-        /// <param name="sampleCount">The number of sample readings to take. 
-        /// Must be greater than 0. These samples are automatically averaged.</param>
-        /// <param name="sampleIntervalDuration">The time, in milliseconds,
-        /// to wait in between samples during a reading.</param>
-        /// <returns>A float value that's ann average value of all the samples taken.</returns>
         protected override async Task<JoystickPosition> ReadSensor()
         {
             var h = await HorizontalInputPort.Read();
