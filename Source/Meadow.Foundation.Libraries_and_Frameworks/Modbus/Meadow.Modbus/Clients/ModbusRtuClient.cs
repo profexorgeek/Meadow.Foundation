@@ -4,6 +4,14 @@ using System.Threading.Tasks;
 
 namespace Meadow.Modbus
 {
+    public class CrcException : Exception 
+    {
+        internal CrcException()
+            : base("CRC Failure")
+        {
+        }
+    }
+
     public class ModbusRtuClient : ModbusClientBase
     {
         private const int HEADER_DATA_OFFSET = 4;
@@ -39,7 +47,9 @@ namespace Meadow.Modbus
             if (!_port.IsOpen)
             {
                 _port.Open();
+                _port.ClearReceiveBuffer();
             }
+
             IsConnected = true;
             return Task.CompletedTask;
         }
@@ -58,13 +68,30 @@ namespace Meadow.Modbus
             {
                 await Task.Delay(10);
                 t += 10;
-                if (t > _port.ReadTimeout.TotalMilliseconds) throw new TimeoutException();
+                if (_port.ReadTimeout.TotalMilliseconds > 0 &&  t > _port.ReadTimeout.TotalMilliseconds) throw new TimeoutException();
             }
 
-            var buffer = new byte[_port.BytesToRead];
+            var header = new byte[3];
 
-            var read = 0;
+            // read 5 bytes so we can get the length
+            _port.Read(header,0, header.Length);
 
+            // TODO: verify these?
+            // header[0] == modbus address
+            // header[1] == called function
+            // header[2] == data length
+
+            //            if (function != (ModbusFunction)header[1])
+            //            {
+            // TODO: should we care?
+            //            }
+
+            var buffer = new byte[header[2] + 5]; // header + length + CRC
+
+            // the CRC includes the header, so we need those in the buffer
+            Array.Copy(header, buffer, 3);
+
+            var read = 3;
             while (read < buffer.Length)
             {
                 read += _port.Read(buffer, read, buffer.Length - read);
@@ -73,17 +100,7 @@ namespace Meadow.Modbus
             // do a CRC on all but the last 2 bytes, then see if that matches the last 2
             var expectedCrc = Crc(buffer, 0, buffer.Length - 2);
             var actualCrc = buffer[buffer.Length - 2] | buffer[buffer.Length - 1] << 8;
-            if (expectedCrc != actualCrc) throw new Exception("CRC Failure");
-
-            // TODO: verify these?
-            // buffer[0] == modbus address
-            // buffer[1] == called function
-            // buffer[2] == data length
-
-            if (function != (ModbusFunction)buffer[1])
-            {
-                // TODO: should we care?
-            }
+            if (expectedCrc != actualCrc) throw new CrcException();
 
             var result = new byte[buffer[2]];
             Array.Copy(buffer, 3, result, 0, result.Length);

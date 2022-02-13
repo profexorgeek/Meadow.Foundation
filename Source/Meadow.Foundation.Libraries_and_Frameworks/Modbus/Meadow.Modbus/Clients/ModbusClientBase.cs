@@ -94,6 +94,13 @@ namespace Meadow.Modbus
             await _syncRoot.WaitAsync();
             try
             {
+                if (startRegister > 40000)
+                {
+                    // holding registers are defined as starting at 40001, but the actual bus read doesn't use the address, but instead the offset
+                    // we'll support th user passing in the definition either way
+                    startRegister -= 40001;
+                }
+
                 if (registerCount > MaxRegisterReadCount) throw new ArgumentException($"A maximum of {MaxRegisterReadCount} registers can be retrieved at one time");
 
                 var message = GenerateReadMessage(modbusAddress, ModbusFunction.ReadHoldingRegister, startRegister, registerCount);
