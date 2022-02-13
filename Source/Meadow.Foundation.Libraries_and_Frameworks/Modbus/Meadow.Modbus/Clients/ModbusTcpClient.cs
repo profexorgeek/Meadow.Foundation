@@ -14,7 +14,6 @@ namespace Meadow.Modbus
 
         private readonly TcpClient _client;
         private ushort _transaction = 0;
-        private bool _disposed;
         private byte[] _responseBuffer = new byte[300]; // I think the max is 9 + 255, but this gives a little room
 
         public ModbusTcpClient(string destinationAddress, short port = DefaultModbusTCPPort)
@@ -29,24 +28,9 @@ namespace Meadow.Modbus
             _client = new TcpClient();
         }
 
-        protected virtual void Dispose(bool disposing)
+        protected override void DisposeManagedResources()
         {
-            if (!_disposed)
-            {
-                if (disposing)
-                {
-                    _client.Dispose();
-                }
-
-                _disposed = true;
-            }
-        }
-
-        public void Dispose()
-        {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
+            _client?.Dispose();
         }
 
         public override async Task Connect()

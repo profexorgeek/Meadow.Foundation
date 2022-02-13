@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Meadow.Modbus
 {
-    public abstract class ModbusClientBase : IModbusBusClient
+    public abstract class ModbusClientBase : IModbusBusClient, IDisposable
     {
         private const int MaxRegisterReadCount = 125;
 
@@ -15,6 +15,8 @@ namespace Meadow.Modbus
         private bool _connected;
         private SemaphoreSlim _syncRoot = new SemaphoreSlim(1, 1);
 
+        public bool IsDisposed { get; private set; }
+
         protected abstract byte[] GenerateWriteMessage(byte modbusAddress, ModbusFunction function, ushort register, byte[] data);
         protected abstract byte[] GenerateReadMessage(byte modbusAddress, ModbusFunction function, ushort startRegister, int registerCount);
 
@@ -23,6 +25,34 @@ namespace Meadow.Modbus
 
         public abstract Task Connect();
         public abstract void Disconnect();
+
+        protected virtual void DisposeManagedResources() { }
+        protected virtual void DisposeUnmanagedResources() { }
+
+        public ModbusClientBase()
+        {
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!IsDisposed)
+            {
+                if (disposing)
+                {
+                    DisposeManagedResources();
+                }
+
+                DisposeUnmanagedResources();
+
+                IsDisposed = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
 
         public bool IsConnected
         {

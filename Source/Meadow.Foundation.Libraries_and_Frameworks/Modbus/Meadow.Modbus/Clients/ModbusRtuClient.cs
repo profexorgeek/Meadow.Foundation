@@ -11,10 +11,17 @@ namespace Meadow.Modbus
         private ISerialPort _port;
         private IDigitalOutputPort? _enable;
 
+        public string PortName => _port.PortName; 
+
         public ModbusRtuClient(ISerialPort port, IDigitalOutputPort? enablePort = null)
         {
             _port = port;
             _enable = enablePort;
+        }
+
+        protected override void DisposeManagedResources()
+        {
+            _port?.Dispose();
         }
 
         private void SetEnable(bool state)
