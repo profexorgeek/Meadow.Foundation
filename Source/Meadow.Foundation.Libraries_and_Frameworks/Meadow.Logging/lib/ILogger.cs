@@ -1,10 +1,30 @@
-﻿using System;
-
-namespace Meadow.Foundation.Web.Maple.Server
+﻿namespace Meadow.Logging
 {
-    public class ConsoleLogger : ILogger
+    public class Logger
     {
+        private LogProviderCollection _providers = new LogProviderCollection();
         public Loglevel Loglevel { get; set; } = Loglevel.Error;
+
+        public Logger(params ILogProvider[] providers)
+        {
+            foreach (var p in providers)
+            {
+                AddProvider(p);
+            }
+        }
+
+        public Logger(ILogProvider provider)
+        {
+            AddProvider(provider);
+        }
+
+        void AddProvider(ILogProvider provider)
+        {
+            lock (_providers)
+            {
+                _providers.Add(provider);
+            }
+        }
 
         public void Debug(string message)
         {
@@ -46,10 +66,17 @@ namespace Meadow.Foundation.Web.Maple.Server
             if (condition) Log(Loglevel.Error, message);
         }
 
-        public void Log(Loglevel level, string message)
+        private void Log(Loglevel level, string message)
         {
             if (Loglevel < level) return;
-            Console.WriteLine($"{level.ToString().ToUpper()}: {message}");
+
+            lock (_providers)
+            {
+                foreach (var p in _providers)
+                {
+                    p.Log(level, message);
+                }
+            }
         }
     }
 }
