@@ -64,17 +64,17 @@ namespace Meadow.Modbus
         {
             // the response must be at least 5 bytes, so wait for at least that much to come in
             var t = 0;
-            while(_port.BytesToRead < 5)
+            while (_port.BytesToRead < 5)
             {
                 await Task.Delay(10);
                 t += 10;
-                if (_port.ReadTimeout.TotalMilliseconds > 0 &&  t > _port.ReadTimeout.TotalMilliseconds) throw new TimeoutException();
+                if (_port.ReadTimeout.TotalMilliseconds > 0 && t > _port.ReadTimeout.TotalMilliseconds) throw new TimeoutException();
             }
 
             var header = new byte[3];
 
             // read 5 bytes so we can get the length
-            _port.Read(header,0, header.Length);
+            _port.Read(header, 0, header.Length);
 
             // TODO: verify these?
             // header[0] == modbus address
@@ -86,7 +86,21 @@ namespace Meadow.Modbus
             // TODO: should we care?
             //            }
 
-            var buffer = new byte[header[2] + 5]; // header + length + CRC
+            int dataLength;
+
+            switch (function)
+            {
+                case ModbusFunction.WriteRegister:
+                    dataLength = 7;
+                    break;
+                case ModbusFunction.ReadHoldingRegister:
+                    dataLength = 5;
+                    break;
+                default:
+                    dataLength = 5;
+                    break;
+            }
+            var buffer = new byte[header[2] + dataLength]; // header + length + CRC
 
             // the CRC includes the header, so we need those in the buffer
             Array.Copy(header, buffer, 3);

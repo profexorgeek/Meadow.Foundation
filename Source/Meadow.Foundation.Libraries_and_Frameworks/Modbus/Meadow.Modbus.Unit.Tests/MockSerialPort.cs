@@ -19,8 +19,8 @@ namespace Meadow.Modbus.Unit.Tests
 
         public int ReceiveBufferSize => throw new NotImplementedException();
 
-        public int ReadTimeout { get; set; } = 100;
-        public int WriteTimeout { get; set; } = 100;
+        public TimeSpan ReadTimeout { get; set; } = TimeSpan.FromMilliseconds(100);
+        public TimeSpan WriteTimeout { get; set; } = TimeSpan.FromMilliseconds(100);
 
         public StopBits StopBits => StopBits.One;
 
@@ -31,6 +31,10 @@ namespace Meadow.Modbus.Unit.Tests
         public byte[]? ReceiveBuffer { get; set; }
 
         public void ClearReceiveBuffer()
+        {
+        }
+
+        public void Dispose()
         {
         }
 
