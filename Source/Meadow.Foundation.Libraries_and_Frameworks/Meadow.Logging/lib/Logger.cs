@@ -18,7 +18,7 @@
             AddProvider(provider);
         }
 
-        void AddProvider(ILogProvider provider)
+        public void AddProvider(ILogProvider provider)
         {
             lock (_providers)
             {

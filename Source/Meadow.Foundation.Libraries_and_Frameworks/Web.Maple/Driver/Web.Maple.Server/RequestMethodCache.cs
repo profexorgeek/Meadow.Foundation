@@ -8,22 +8,15 @@ using System.Text.RegularExpressions;
 
 namespace Meadow.Foundation.Web.Maple.Server
 {
-    internal class HandlerInfo
-    {
-        public Type? HandlerType { get; set; }
-        public MethodInfo? Method { get; set; }
-        public ParameterInfo? Parameter { get; set; }
-    }
-
     internal class RequestMethodCache
     {
         // this is a VERB:NAME:METHOD lookup
         private Dictionary<string, Dictionary<string, MethodInfo>> _methodCache = new Dictionary<string, Dictionary<string, MethodInfo>>(StringComparer.InvariantCultureIgnoreCase);
 
-        public ILogger? Logger { get; }
+        public Logger? Logger { get; }
         private Regex ParamRegex { get; } = new Regex("{(.*?)}");
 
-        public RequestMethodCache(ILogger? logger)
+        public RequestMethodCache(Logger? logger)
         {
             Logger = logger;
         }

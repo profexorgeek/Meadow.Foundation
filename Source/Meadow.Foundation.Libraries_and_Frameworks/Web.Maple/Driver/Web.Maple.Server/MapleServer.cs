@@ -1,6 +1,7 @@
 ﻿using Meadow.Logging;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
@@ -35,7 +36,7 @@ namespace Meadow.Foundation.Web.Maple.Server
         /// <summary>
         /// Logger being used to log messages
         /// </summary>
-        public ILogger? Logger { get; }
+        public Logger? Logger { get; }
         /// <summary>
         /// Local Address server is bound to
         /// </summary>
@@ -87,7 +88,7 @@ namespace Meadow.Foundation.Web.Maple.Server
             int port = DefaultPort,
             bool advertise = false,
             RequestProcessMode processMode = RequestProcessMode.Serial,
-            ILogger? logger = null)
+            Logger? logger = null)
             : this(IPAddress.Parse(ipAddress), port, advertise, processMode, logger)
         {
         }
@@ -108,9 +109,15 @@ namespace Meadow.Foundation.Web.Maple.Server
             int port = DefaultPort,
             bool advertise = false,
             RequestProcessMode processMode = RequestProcessMode.Serial,
-            ILogger? logger = null)
+            Logger? logger = null)
         {
-            Logger = logger ?? new ConsoleLogger();
+            if (Debugger.IsAttached && logger == null)
+            {
+                Logger = new Logger();
+                Logger.AddProvider(new DebugLogProvider());
+            }
+
+            Logger = logger;
             MethodCache = new RequestMethodCache(Logger);
             ErrorPageGenerator = new ErrorPageGenerator();
 
