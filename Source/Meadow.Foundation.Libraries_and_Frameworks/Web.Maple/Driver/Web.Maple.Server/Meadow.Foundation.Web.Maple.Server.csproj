@@ -29,6 +29,7 @@
     <Folder Include="ActionResults\" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Meadow.Logging" Version="0.24.0" />
     <PackageReference Include="SimpleJson" Version="0.38.0" />
   </ItemGroup>
 </Project>

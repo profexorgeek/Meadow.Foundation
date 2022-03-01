@@ -8,6 +8,9 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Meadow.Logging" Version="0.24.0" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\..\Driver\Web.Maple.Server\Meadow.Foundation.Web.Maple.Server.csproj" />
   </ItemGroup>
 </Project>

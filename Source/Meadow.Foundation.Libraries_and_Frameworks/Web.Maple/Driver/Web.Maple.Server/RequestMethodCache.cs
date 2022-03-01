@@ -1,4 +1,5 @@
 ﻿using Meadow.Foundation.Web.Maple.Server.Routing;
+using Meadow.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,22 +10,15 @@ using System.Text.RegularExpressions;
 
 namespace Meadow.Foundation.Web.Maple.Server
 {
-    internal class HandlerInfo
-    {
-        public Type? HandlerType { get; set; }
-        public MethodInfo? Method { get; set; }
-        public ParameterInfo? Parameter { get; set; }
-    }
-
     internal class RequestMethodCache
     {
         // this is a VERB:NAME:METHOD lookup
         private Dictionary<string, Dictionary<string, MethodInfo>> _methodCache = new Dictionary<string, Dictionary<string, MethodInfo>>(StringComparer.InvariantCultureIgnoreCase);
 
-        public ILogger? Logger { get; }
+        public Logger? Logger { get; }
         private Regex ParamRegex { get; } = new Regex("{(.*?)}");
 
-        public RequestMethodCache(ILogger? logger)
+        public RequestMethodCache(Logger? logger)
         {
             Logger = logger;
         }
@@ -182,7 +176,7 @@ namespace Meadow.Foundation.Web.Maple.Server
                 // generate the regex to test against urls
                 var rgx = template
                     .Replace(match.Value, "(.*?)", StringComparison.OrdinalIgnoreCase)
-                    .Replace("/", "\\/");                
+                    .Replace("/", "\\/");
                 rgx += "$";
 
                 if (!_templateToTypeMap.ContainsKey(verb))
@@ -227,7 +221,7 @@ namespace Meadow.Foundation.Web.Maple.Server
         {
             if ((t.GetInterfaces() ?? null).Contains(typeof(IRequestHandler)))
             {
-                foreach(var m in t.GetMethods())
+                foreach (var m in t.GetMethods())
                 {
                     //first, let's see if the method has the correct http verb
                     foreach (var attr in m.GetCustomAttributes())

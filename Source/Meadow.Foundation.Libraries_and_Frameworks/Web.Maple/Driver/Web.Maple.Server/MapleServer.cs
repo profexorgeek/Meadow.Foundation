@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Meadow.Logging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -25,7 +26,7 @@ namespace Meadow.Foundation.Web.Maple.Server
         private readonly HttpListener _httpListener = new HttpListener();
         private ErrorPageGenerator ErrorPageGenerator { get; }
 
-        public ILogger Logger { get; }
+        public Logger Logger { get; }
         public IPAddress IPAddress { get; private set; }
         public int Port { get; private set; }
 
@@ -60,7 +61,7 @@ namespace Meadow.Foundation.Web.Maple.Server
             int port = DefaultPort,
             bool advertise = false,
             RequestProcessMode processMode = RequestProcessMode.Serial,
-            ILogger logger = null)
+            Logger logger = null)
             : this(IPAddress.Parse(ipAddress), port, advertise, processMode, logger)
         {
         }
@@ -80,9 +81,9 @@ namespace Meadow.Foundation.Web.Maple.Server
             int port = DefaultPort,
             bool advertise = false,
             RequestProcessMode processMode = RequestProcessMode.Serial,
-            ILogger logger = null)
+            Logger logger = null)
         {
-            Logger = logger ?? new ConsoleLogger();
+            Logger = logger ?? new Logger();
             MethodCache = new RequestMethodCache(Logger);
             ErrorPageGenerator = new ErrorPageGenerator();
 
