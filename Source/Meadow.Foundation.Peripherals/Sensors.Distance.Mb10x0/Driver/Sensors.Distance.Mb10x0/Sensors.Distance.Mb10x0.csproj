@@ -11,12 +11,12 @@
     <PackageId>Meadow.Foundation.Sensors.Distance.Mb10x0</PackageId>
     <RepositoryUrl>https://github.com/WildernessLabs/Meadow.Foundation</RepositoryUrl>
     <PackageTags>Meadow.Foundation, Mb10x0, Distance, Sensor</PackageTags>
-    <Version>0.1.10</Version>
-    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <Version>0.1.14</Version>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Description>MaxSonar MB10x0 serial ultrasonic distance sensor</Description>
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\..\..\..\icon.png" Pack="true" PackagePath="" />
-    <ProjectReference Include="..\..\..\..\Meadow.Foundation.Core\Meadow.Foundation.Core.csproj" />
+    <PackageReference Include="Meadow.Foundation" Version="0.32.*" />
   </ItemGroup>
 </Project>

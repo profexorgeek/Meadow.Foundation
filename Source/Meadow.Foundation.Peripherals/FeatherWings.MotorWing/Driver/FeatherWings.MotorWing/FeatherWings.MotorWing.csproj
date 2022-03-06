@@ -11,8 +11,8 @@
     <PackageId>Meadow.Foundation.FeatherWings.MotorWing</PackageId>
     <RepositoryUrl>https://github.com/WildernessLabs/Meadow.Foundation</RepositoryUrl>
     <PackageTags>Meadow.Foundation, FeatherWing, MotorWing, Motor Driver</PackageTags>
-    <Version>0.1.39</Version>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Version>0.1.42</Version>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <Description>AdaFruit MotorWing motor controller FeatherWing</Description>
   </PropertyGroup>
   <ItemGroup>

@@ -1,12 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <TargetFramework>net5.0</TargetFramework>
-
     <IsPackable>false</IsPackable>
   </PropertyGroup>
-
   <ItemGroup>
     <None Remove="RGB17x3_16.bmp" />
     <None Remove="RGB17x3_16_rev.bmp" />
@@ -23,7 +20,6 @@
     <None Remove="wl4.bmp" />
     <None Remove="wl8.bmp" />
   </ItemGroup>
-
   <ItemGroup>
     <Content Include="RGB17x3_16.bmp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -68,7 +64,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.7.1" />
     <PackageReference Include="xunit" Version="2.4.1" />
@@ -81,9 +76,7 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\..\Driver\Graphics.MicroGraphics\MicroGraphics.csproj" />
   </ItemGroup>
-
 </Project>
