@@ -17,10 +17,10 @@
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\..\..\..\icon.png" Pack="true" PackagePath="" />
-    <ProjectReference Include="..\..\..\..\Meadow.Foundation.Libraries_and_Frameworks\Graphics\MicroGraphics\Driver\Graphics.MicroGraphics\MicroGraphics.csproj" />
+    <PackageReference Include="Meadow.Foundation.Displays.MicroGraphics" Version="0.9.*" />
     <ProjectReference Include="..\..\..\Displays.Ssd130x\Driver\Displays.Ssd130x\Displays.Ssd130x.csproj" />
     <ProjectReference Include="..\..\..\Displays.TftSpi\Driver\Displays.TftSpi\Displays.TftSpi.csproj" />
-    <ProjectReference Include="..\..\..\Sensors.Hid.BBQ10Keyboard\Driver\Sensors.Hid.BBQ10Keyboard\Sensors.Hid.Bbq10Keyboard.csproj" />
+    <PackageReference Include="Meadow.Foundation.Sensors.Hid.Bbq10Keyboard" Version="0.1.*" />
     <ProjectReference Include="..\..\..\Sensors.Hid.Tsc2004\Driver\Sensors.Hid.Tsc2004\Sensors.Hid.Tsc2004.csproj" />
   </ItemGroup>
 </Project>

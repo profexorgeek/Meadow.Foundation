@@ -11,6 +11,6 @@
     <PackageReference Include="coverlet.collector" Version="1.3.0" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Driver\Web.Maple.Server\Meadow.Foundation.Web.Maple.Server.csproj" />
+    <PackageReference Include="Meadow.Foundation.Web.Maple.Server" Version="0.4.*" />
   </ItemGroup>
 </Project>

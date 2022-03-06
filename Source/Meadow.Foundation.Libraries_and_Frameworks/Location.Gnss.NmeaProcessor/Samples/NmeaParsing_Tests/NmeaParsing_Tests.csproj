@@ -13,6 +13,6 @@
   <ItemGroup>
     <None Include="..\..\..\..\icon.png" Pack="true" PackagePath="" />
     <PackageReference Include="Meadow.F7" Version="0.30.*" />
-    <ProjectReference Include="..\..\Driver\Location.Gnss.NmeaProcessor\Location.Gnss.NmeaParsing.csproj" />
+    <PackageReference Include="Meadow.Foundation.Sensors.Location.Gnss.NmeaParsing" Version="0.1.*" />
   </ItemGroup>
 </Project>

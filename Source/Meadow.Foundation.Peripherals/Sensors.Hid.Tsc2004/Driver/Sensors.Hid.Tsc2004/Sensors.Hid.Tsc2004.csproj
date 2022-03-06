@@ -11,13 +11,13 @@
     <PackageId>Meadow.Foundation.Sensors.Hid.Tsc2004</PackageId>
     <RepositoryUrl>https://github.com/WildernessLabs/Meadow.Foundation</RepositoryUrl>
     <PackageTags>Meadow.Foundation,touch,screen,display,capacitive,tsc2004</PackageTags>
-    <Version>0.1.0</Version>
-    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <Version>0.1.1</Version>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Description>Tsc2004 I2C capacitive touch screen</Description>
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\..\..\..\icon.png" Pack="true" PackagePath="" />
     <PackageReference Include="Meadow.Foundation" Version="0.32.*" />
-    <ProjectReference Include="..\..\..\..\Meadow.Foundation.Libraries_and_Frameworks\Graphics\MicroGraphics\Driver\Graphics.MicroGraphics\MicroGraphics.csproj" />
+    <PackageReference Include="Meadow.Foundation.Displays.MicroGraphics" Version="0.9.*" />
   </ItemGroup>
 </Project>
