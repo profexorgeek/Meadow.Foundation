@@ -103,15 +103,16 @@ namespace Meadow.Foundation.Graphics.Buffers
                 return;
             }
 
-            int sourceIndex, destinationIndex;
-            int length = buffer.Width * 2;
+            int sourceIndex = 0;
+            int destinationIndex = (Width * y + x) * 2;
+            int srcWidth = buffer.Width * 2;
+            int destWidth = Width * 2;
 
             for (int i = 0; i < buffer.Height; i++)
             {
-                sourceIndex = length * i;
-                destinationIndex = Width * (y + i) * 2 + x * 2;
-
-                Array.Copy(buffer.Buffer, sourceIndex, Buffer, destinationIndex, length); ;
+                sourceIndex += srcWidth;
+                destinationIndex += destWidth;
+                Array.Copy(buffer.Buffer, sourceIndex, Buffer, destinationIndex, srcWidth);
             }
         }
     }
