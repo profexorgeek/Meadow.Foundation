@@ -4,8 +4,6 @@ namespace Meadow.Foundation.Graphics.Buffers
 {
     public class Buffer1bpp : BufferBase
     {
-        public override int ByteCount => Width * Height / 8;
-
         public override ColorType ColorMode => ColorType.Format1bpp;
 
         public Buffer1bpp(int width, int height, byte[] buffer) : base(width, height, buffer) { }
@@ -23,12 +21,6 @@ namespace Meadow.Foundation.Graphics.Buffers
             Buffer = new byte[bufferSize];
         }
 
-        public bool GetPixelIsColored(int x, int y)
-        {
-            var index = (y >> 8) * Width + x;
-
-            return (Buffer[index] & (1 << y % 8)) != 0;
-        }
 
         public override Color GetPixel(int x, int y)
         {
@@ -87,6 +79,33 @@ namespace Meadow.Foundation.Graphics.Buffers
             }
         }
 
+        public new void WriteBuffer(int x, int y, IPixelBuffer buffer)
+        {
+            if (base.WriteBuffer(x, y, buffer))
+            {   //call the base for validation
+                //and to handle the slow path when buffers don't match
+                return;
+            }
+
+            for (int i = 0; i < buffer.Width; i++)
+            {
+                for (int j = 0; j < buffer.Height; j++)
+                {
+                    //if we got really clever we could find other alignment points but this is a good start
+                    if (y % 8 == 0 && j + 8 <= buffer.Height)
+                    {
+                        //copy an entire byte - fast
+                        Buffer[((y + j) >> 3) * Width + x + i] = buffer.Buffer[(j >> 3) * buffer.Width + i];
+                        j += 7; //the main loop will add 1 to make it 8
+                    }
+                    else
+                    {   //else 1 bit at a time 
+                        SetPixel(x + i, y + j, (buffer as Buffer1bpp).GetPixelIsColored(i, j));
+                    }
+                }
+            }
+        }
+
         public void Clear(bool isColored)
         {
             // split the color in to two byte values
@@ -103,33 +122,14 @@ namespace Meadow.Foundation.Graphics.Buffers
             Array.Copy(Buffer, 0, Buffer, copyLength, Buffer.Length - copyLength);
         }
 
-        public new void WriteBuffer(int x, int y, IPixelBuffer buffer)
-        {
-            if (base.WriteBuffer(x, y, buffer))
-            {   //call the base for validation
-                //and to handle the slow path when buffers don't match
-                return;
-            }
+        
 
-            for (int i = 0; i < buffer.Width; i++)
-            {
-                for (int j = 0; j < buffer.Height; j++)
-                {
-                    //if we got really clever we could find other alignment points but this is a good start
-                    if(y%8 == 0 && j + 8 <= buffer.Height)
-                    {
-                        //copy an entire byte - fast
-                        Buffer[((y + j) >> 3) * Width + x + i] = buffer.Buffer[(j >> 3) * buffer.Width + i];
-                        j += 7; //the main loop will add 1 to make it 8
-                    }
-                    else
-                    {   //else 1 bit at a time 
-                        SetPixel(x + i, y + j, (buffer as Buffer1bpp).GetPixelIsColored(i, j));
-                    }
-                }
-            }
-        }
-
+        /// <summary>
+        /// TODO: either move this to the IPixelBuffer interface so all
+        /// buffers have this method, or move it to the renderer layer
+        /// </summary>
+        /// <param name="rotation"></param>
+        /// <returns></returns>
         public Buffer1bpp Rotate(RotationType rotation)
         {
             Buffer1bpp newBuffer;
@@ -175,6 +175,14 @@ namespace Meadow.Foundation.Graphics.Buffers
             }
 
             return newBuffer;
+        }
+
+
+        bool GetPixelIsColored(int x, int y)
+        {
+            var index = (y >> 8) * Width + x;
+
+            return (Buffer[index] & (1 << y % 8)) != 0;
         }
     }
 }
