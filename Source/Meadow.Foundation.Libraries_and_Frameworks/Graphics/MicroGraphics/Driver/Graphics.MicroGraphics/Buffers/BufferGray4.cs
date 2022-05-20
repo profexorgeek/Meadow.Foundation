@@ -4,8 +4,6 @@ namespace Meadow.Foundation.Graphics.Buffers
 {
     public class BufferGray4 : BufferBase
     {
-        public override int ByteCount => Width * Height / 2;
-
         public override ColorType ColorMode => ColorType.Format4bppGray;
 
         public BufferGray4(int width, int height, byte[] buffer) : base(width, height, buffer) { }

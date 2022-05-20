@@ -17,14 +17,19 @@ namespace Meadow.Foundation.Graphics.Buffers
         int Height { get; }
 
         /// <summary>
+        /// Color mode of buffer
+        /// </summary>
+        ColorType ColorMode { get; }
+
+        /// <summary>
         /// Total bytes in buffer
         /// </summary>
         int ByteCount { get; }
 
         /// <summary>
-        /// Color mode of buffer
+        /// The bit depth of this buffer's ColorMode
         /// </summary>
-        ColorType ColorMode { get; }
+        int BitDepth { get; }
 
         /// <summary>
         /// The bytes of the buffer data as a byte array

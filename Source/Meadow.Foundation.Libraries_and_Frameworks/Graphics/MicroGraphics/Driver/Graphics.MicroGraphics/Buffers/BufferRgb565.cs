@@ -4,8 +4,6 @@ namespace Meadow.Foundation.Graphics.Buffers
 {
     public class BufferRgb565 : BufferBase
     {
-        public override int ByteCount => Width * Height * 2;
-
         public override ColorType ColorMode => ColorType.Format16bppRgb565;
 
         public BufferRgb565(int width, int height, byte[] buffer) : base(width, height, buffer) { }
