@@ -2,7 +2,7 @@
 
 namespace Meadow.Foundation.Graphics.Buffers
 {
-    public abstract class BufferBase : IDisplayBuffer
+    public abstract class BufferBase : IPixelBuffer
     {
         public int Width { get; protected set; }
         public int Height { get; protected set; }
@@ -11,7 +11,7 @@ namespace Meadow.Foundation.Graphics.Buffers
 
         public abstract int ByteCount { get; }
 
-        public abstract ColorType displayColorMode { get; }
+        public abstract ColorType ColorMode { get; }
 
         public BufferBase()
         {
@@ -47,7 +47,7 @@ namespace Meadow.Foundation.Graphics.Buffers
         }
 
         //return true if the write has been handled
-        public bool WriteBuffer(int x, int y, IDisplayBuffer buffer)
+        public bool WriteBuffer(int x, int y, IPixelBuffer buffer)
         {
             if (x < 0 || x + buffer.Width > Width ||
                 y < 0 || y + buffer.Height > Height)
@@ -66,7 +66,7 @@ namespace Meadow.Foundation.Graphics.Buffers
         public abstract void Fill(Color color);
         public abstract void Fill(Color color, int x, int y, int width, int height);
 
-        protected void WriteBufferSlow(int x, int y, IDisplayBuffer buffer)
+        protected void WriteBufferSlow(int x, int y, IPixelBuffer buffer)
         {
             Color color;
 

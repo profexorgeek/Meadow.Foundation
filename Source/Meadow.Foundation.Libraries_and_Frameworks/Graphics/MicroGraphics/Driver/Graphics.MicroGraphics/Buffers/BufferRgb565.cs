@@ -6,7 +6,7 @@ namespace Meadow.Foundation.Graphics.Buffers
     {
         public override int ByteCount => Width * Height * 2;
 
-        public override ColorType displayColorMode => ColorType.Format16bppRgb565;
+        public override ColorType ColorMode => ColorType.Format16bppRgb565;
 
         public BufferRgb565(int width, int height, byte[] buffer) : base(width, height, buffer) { }
 
@@ -95,7 +95,7 @@ namespace Meadow.Foundation.Graphics.Buffers
             Array.Copy(Buffer, 0, Buffer, copyLength, Buffer.Length - copyLength);
         }
 
-        public new void WriteBuffer(int x, int y, IDisplayBuffer buffer)
+        public new void WriteBuffer(int x, int y, IPixelBuffer buffer)
         {
             if (base.WriteBuffer(x, y, buffer))
             {   //call the base for validation

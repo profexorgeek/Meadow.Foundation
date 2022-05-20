@@ -6,7 +6,7 @@ namespace Meadow.Foundation.Graphics.Buffers
     {
         public override int ByteCount => Width * Height / 8;
 
-        public override ColorType displayColorMode => ColorType.Format1bpp;
+        public override ColorType ColorMode => ColorType.Format1bpp;
 
         public Buffer1bpp(int width, int height, byte[] buffer) : base(width, height, buffer) { }
 
@@ -103,7 +103,7 @@ namespace Meadow.Foundation.Graphics.Buffers
             Array.Copy(Buffer, 0, Buffer, copyLength, Buffer.Length - copyLength);
         }
 
-        public new void WriteBuffer(int x, int y, IDisplayBuffer buffer)
+        public new void WriteBuffer(int x, int y, IPixelBuffer buffer)
         {
             if (base.WriteBuffer(x, y, buffer))
             {   //call the base for validation

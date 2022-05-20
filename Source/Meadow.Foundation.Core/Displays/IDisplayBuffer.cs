@@ -2,9 +2,9 @@
 namespace Meadow.Foundation.Graphics.Buffers
 {
     /// <summary>
-    /// Represents an abstract 2D buffer of graphics data
+    /// Represents an abstract 2D buffer of pixel data
     /// </summary>
-    public interface IDisplayBuffer
+    public interface IPixelBuffer
     {
         /// <summary>
         /// Width in pixels
@@ -24,7 +24,7 @@ namespace Meadow.Foundation.Graphics.Buffers
         /// <summary>
         /// Color mode of buffer
         /// </summary>
-        ColorType displayColorMode { get; }
+        ColorType ColorMode { get; }
 
         /// <summary>
         /// The bytes of the buffer data as a byte array
@@ -54,7 +54,7 @@ namespace Meadow.Foundation.Graphics.Buffers
         /// <param name="y">target y position to draw buffer </param>
         /// <param name="buffer">buffer to draw to target</param>
         /// <returns></returns>
-        bool WriteBuffer(int x, int y, IDisplayBuffer buffer);
+        bool WriteBuffer(int x, int y, IPixelBuffer buffer);
 
         /// <summary>
         /// Clear the buffer (write 0s to byte array)
