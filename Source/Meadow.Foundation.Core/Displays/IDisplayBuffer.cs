@@ -49,6 +49,8 @@ namespace Meadow.Foundation.Graphics.Buffers
 
         /// <summary>
         /// Copy a buffer into this buffer
+        /// 
+        /// TODO: add scale and ignore out of bounds to this
         /// </summary>
         /// <param name="x">target x position to draw buffer</param>
         /// <param name="y">target y position to draw buffer </param>
